@@ -854,6 +854,12 @@
         let currentUser = '';
         let currentRole = '';
         let authToken = '';
+        const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbx77LrXYpsTNZUTLyZ_W6YVWpfugcsFAyK4xdvpqs1mipOwPZ-bIl8lpHeE4T5K7VDJGw/exec';
+        const TRANSACTION_STORAGE_PREFIX = `ran5_${new URL(SHEET_API_URL).pathname.split('/')[3]}_`;
+
+        function transactionStorageKey(name) {
+            return `${TRANSACTION_STORAGE_PREFIX}${name}`;
+        }
 
         async function callSheetApi(payload) {
             const response = await fetch(SHEET_API_URL, {
@@ -921,8 +927,6 @@
         let hoardItems = []; 
         let myChart = null;
         const colorPalette = ['#3b82f6', '#ef4444', '#10b981', '#eab308', '#f97316', '#8b5cf6', '#ec4899', '#06b6d4'];
-        
-        const SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbzTrQVebYQHzeMLRMfpjqVOjE3sq-MWp6ntYPAyrmJCvkSyVxJvIQvEdTHJPky54uqW7g/exec';
 
         let dynamicCraftsData = {
             alloy: {
@@ -961,8 +965,8 @@
         };
 
         function saveData() {
-            localStorage.setItem('ran5_incomes', JSON.stringify(incomes));
-            localStorage.setItem('ran5_expenses', JSON.stringify(expenses));
+            localStorage.setItem(transactionStorageKey('incomes'), JSON.stringify(incomes));
+            localStorage.setItem(transactionStorageKey('expenses'), JSON.stringify(expenses));
             localStorage.setItem('ran5_crafts', JSON.stringify(dynamicCraftsData));
             localStorage.setItem('ran5_inc_opt', JSON.stringify(incomeOptions));
             localStorage.setItem('ran5_exp_opt', JSON.stringify(expenseOptions));
@@ -1035,8 +1039,8 @@
                     String(row.item == null ? '' : row.item).trim()
                 ));
 
-                if ((incomes.length || expenses.length) && !localStorage.getItem('ran5_sheet_local_backup')) {
-                    localStorage.setItem('ran5_sheet_local_backup', JSON.stringify({
+                if ((incomes.length || expenses.length) && !localStorage.getItem(transactionStorageKey('sheet_local_backup'))) {
+                    localStorage.setItem(transactionStorageKey('sheet_local_backup'), JSON.stringify({
                         savedAt: new Date().toISOString(),
                         incomes,
                         expenses
@@ -1257,10 +1261,10 @@
         }
 
         function loadData() {
-            const savedIncomes = localStorage.getItem('ran5_incomes');
+            const savedIncomes = localStorage.getItem(transactionStorageKey('incomes'));
             if (savedIncomes) incomes = JSON.parse(savedIncomes);
 
-            const savedExpenses = localStorage.getItem('ran5_expenses');
+            const savedExpenses = localStorage.getItem(transactionStorageKey('expenses'));
             if (savedExpenses) expenses = JSON.parse(savedExpenses);
 
             const savedCrafts = localStorage.getItem('ran5_crafts');
